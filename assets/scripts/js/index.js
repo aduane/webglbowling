@@ -736,22 +736,6 @@ function track_mouse( )
     
     if ( mouse_is_down == false && mouse_positions.length > 2 && play == true )
     {
-    
-//       var x = ( ( window.innerWidth  / 2 ) - mouse_positions[ mouse_positions.length - 1 ][ 0 ] )
-//               / ( window.innerWidth  / 2 );
-//     
-//       bowling_ball[ 1 ].position.set( x * 100, 
-//                           bowling_ball_origin[ 1 ], 
-//                           bowling_ball_origin[ 2 ] );
-//     
-//       if      ( bowling_ball[ 1 ].position.x >  35.0 ) bowling_ball[ 1 ].position.x =  34.9;
-//       else if ( bowling_ball[ 1 ].position.x < -35.0 ) bowling_ball[ 1 ].position.x = -34.9;
-//       
-//       bowling_ball_last_updated_position = [ 
-//                 bowling_ball[ 1 ].position.x,
-//                 bowling_ball[ 1 ].position.y,
-//                 bowling_ball[ 1 ].position.z
-//       ];
       
       var mouse_position_3d = screen_position_2d_to_3d( mouse_positions[ mouse_positions.length - 1 ][ 0 ], mouse_positions[ mouse_positions.length - 1 ][ 1 ], bowling_ball[ 1 ].position.z );
       
@@ -804,50 +788,7 @@ function track_mouse( )
         bowling_ball[ 0 ].force.set( 0, 0, 1200 );
         
       }
-      
-//       if (  mouse_is_moving == true )
-//       {
-//       
-//         
-//         
-//         
-//         
-//         bowling_ball[ 0 ].applyForce( new CANNON.Vec3( mouse_position_3d.x * xd, 0, 1200 ), 
-//                     new CANNON.Vec3( bx, by, bz ) );
-//       
-//       }
-//       else
-//       {
-//         
-//         bowling_ball[ 0 ].applyForce( new CANNON.Vec3( 0, 0, 1200 ), 
-//                     new CANNON.Vec3( bx, by, bz ) );
-//         
-//         bowling_ball[ 0 ].angularVelocity.set( 0.0, 0.0, bowling_ball[ 0 ].angularVelocity.z );
-//         bowling_ball[ 0 ].velocity.set( 0.0, 0.0, bowling_ball[ 0 ].velocity.z );
-//         bowling_ball[ 0 ].force.set( 0.0, 0.0, bowling_ball[ 0 ].force.z );
-//         
-//       }
-      
     }
-    else
-    {
-      
-//       bowling_ball[ 1 ].position.set( bowling_ball_last_updated_position[ 0 ], 
-//                           bowling_ball_last_updated_position[ 1 ],
-//               bowling_ball_last_updated_position[ 2 ] );
-      
-    }
-    
-//     bowling_ball[ 1 ].rotation.set( 0.0, 
-//                   0.0, 
-//                   0.0 );
-//     bowling_ball[ 0 ].position.set( bowling_ball[ 1 ].position.x, 
-//                   bowling_ball[ 1 ].position.y, 
-//                   bowling_ball[ 1 ].position.z );
-//     bowling_ball[ 0 ].quaternion =  bowling_ball[ 1 ].quaternion;
-//     bowling_ball[ 0 ].angularVelocity.set( 0.0, 0.0, 0.0 );
-//     bowling_ball[ 0 ].velocity.set( 0.0, 0.0, 0.0 );
-//     bowling_ball[ 0 ].force.set( 0.0, 0.0, 0.0 );
 
     bowling_ball_last_updated_position = [ 
       
@@ -880,62 +821,7 @@ function on_mouse_move( event )
   
   if ( mouse_is_down && on_mouse_down_mouse_on_ball )
   {
-  
-//     var x1 = on_mouse_down_position[ 0 ];
-//     var y1 = on_mouse_down_position[ 1 ];
-//     
-//     var x2 = event.clientX;
-//     var y2 = event.clientY;
-//     
-//     var vector = new THREE.Vector3(  ( x1 / window.innerWidth  ) * 2 - 1,
-//             -( y1 / window.innerHeight ) * 2 + 1,
-//             0.5 
-//     );
-//     projector.unprojectVector( vector, camera );
-//     var direction  =  vector.sub( camera.position ).normalize( );
-//     var distance   = -camera.position.z / direction.z;
-//     var position1  =  camera.position.clone( ).add( direction.multiplyScalar( distance ) );
-//     
-//     vector = new THREE.Vector3(  ( x2 / window.innerWidth  ) * 2 - 1,
-//           -( y2 / window.innerHeight ) * 2 + 1,
-//           0.5 
-//     );
-//     projector.unprojectVector( vector, camera );
-//     direction     =  vector.sub( camera.position ).normalize( );
-//     distance      = -camera.position.z / direction.z;
-//     var position2 =  camera.position.clone( ).add( direction.multiplyScalar( distance ) );
-//     
-//     position1_xd = bowling_ball_last_updated_position[ 0 ] - position1.x;
-//     position1_yd = bowling_ball_last_updated_position[ 1 ] - position1.y;
-//     
-//     position1.x += position1_xd;
-//     position1.y += position1_yd;
-//     
-//     position2.x += position1_xd;
-//     position2.y += position1_yd;
-//     
-//     var xd = position2.x - position1.x;
-//     var yd = position2.y - position1.y;
-//     
-//     var x = xd;
-//     var y = yd;
-//     
-//     var l = Math.sqrt( ( xd * xd ) + ( yd * yd ) );
-//     
-//     if ( l != 0.0 )
-//     {
-//       x = xd / l;
-//       y = yd / l;
-//       
-//     }    
-//     
-//     throwing_direction_arrow.visible  = true;
-//     throwing_direction_arrow.position = new THREE.Vector3( bowling_ball_last_updated_position[ 0 ], bowling_ball_origin[ 1 ], 1 );
-//     throwing_direction_arrow.setDirection( new THREE.Vector3( x, y, 0 ) );
-//     throwing_direction_arrow.setLength( 50 );
-// 
-//     throwing_target.position.set( ( x * 370 ) + bowling_ball_last_updated_position[ 0 ], ( y * 370 ) + bowling_ball_origin[ 1 ], 5 );
-    
+    // no-op
   }
   else
   {
