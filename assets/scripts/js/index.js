@@ -15,10 +15,6 @@
 
 // Game globals.
 
-var round  = 1;
-
-var total_throws = 0;
-
 var current_round_throws = 0;
 
 var play   = false;
@@ -27,7 +23,7 @@ var play   = false;
 
 var audio_on = false;
 
-var background_track, roll_sound_effect, hit_sound_effect, drop_sound_effect, strike_sound_effect;
+var background_track, roll_sound_effect, hit_sound_effect, drop_sound_effect;
 
 var AUDIO_ON_SYMBOL  = "<span class='lettier-icon-audio_on'></span>";
 var AUDIO_OFF_SYMBOL = "<span class='lettier-icon-audio_off'></span>";
@@ -38,7 +34,7 @@ var hit_sound_effect_played = ( new Date( ) ).valueOf( );
 
 // 2D globals.
 
-var loading_div, start_div, power_div, round_div, final_score_div, strike_div, throwing_div;
+var loading_div, start_div, power_div, throwing_div;
 
 var mouse_positions = [ ];
 
@@ -174,14 +170,6 @@ function initialize_audio( )
     
     drop_sound_effect.mute( );
     
-    strike_sound_effect = new buzz.sound( "assets/audio/strike", { formats: [ "ogg", "mp3" ] } );
-    
-    strike_sound_effect.setVolume( 50 );
-    
-    strike_sound_effect.load( );
-    
-    strike_sound_effect.mute( );
-    
     background_track = new buzz.sound( "assets/audio/background_track", { formats: [ "ogg", "mp3" ] } );
     
     background_track.setVolume( 30 );
@@ -206,8 +194,6 @@ function initialize_audio( )
         
         drop_sound_effect.mute( );
         
-        strike_sound_effect.mute( );
-        
         audio_on = false;
         
       }      
@@ -224,8 +210,6 @@ function initialize_audio( )
         hit_sound_effect.unmute( );
         
         drop_sound_effect.unmute( );
-        
-        strike_sound_effect.unmute( );
         
         audio_on = true;
         
@@ -271,8 +255,6 @@ function initialize_2d( )
     
     canvas.className = "";
     
-    round_div.style.visibility        = "visible";
-    score_div.style.visibility        = "visible";
     start_div.style.visibility        = "hidden";
     
   };
@@ -284,42 +266,6 @@ function initialize_2d( )
   power_div.style.width  = 200 + "px";
   power_div.style.height = 10 + "px";
   document.body.appendChild( power_div );
-  
-  round_div              = document.createElement( "div" );
-  round_div.id           = "round_div";
-  round_div.className    = "round_div";
-  round_div.innerHTML    = "Round: " + round;
-  round_div.style.top  = 10 + "px";
-  round_div.style.left = 10 + "px";
-  document.body.appendChild( round_div );
-  
-  score_div              = document.createElement( "div" );
-  score_div.id           = "score_div";
-  score_div.className    = "score_div";
-  score_div.innerHTML    = "Score: 100%";
-  score_div.style.top  = round_div.clientHeight + 10 + "px";
-  score_div.style.left = 10 + "px";
-  document.body.appendChild( score_div );
-  
-  final_score_div               = document.createElement( "div" );
-  final_score_div.id            = "final_score_div";
-  final_score_div.className     = "final_score_div";
-  final_score_div.innerHTML     = "Final Score:<br>100%";
-  document.body.appendChild( final_score_div );
-  
-  final_score_div.style.top        = ( ( window.innerHeight / 2 ) - ( final_score_div.clientHeight / 2 ) ) + "px";
-  final_score_div.style.left       = ( ( window.innerWidth  / 2 ) - ( final_score_div.clientWidth  / 2 ) ) + "px";
-  final_score_div.style.visibility = "hidden";
-  
-  strike_div               = document.createElement( "div" );
-  strike_div.id            = "strike_div";
-  strike_div.className     = "strike_div";
-  strike_div.innerHTML     = "STRIKE!";
-  document.body.appendChild( strike_div );
-  
-  strike_div.style.top        = ( ( window.innerHeight / 2 ) - ( strike_div.clientHeight / 2 ) ) + "px";
-  strike_div.style.left       = ( ( window.innerWidth  / 2 ) - ( strike_div.clientWidth  / 2 ) ) + "px";
-  strike_div.style.visibility = "hidden";
   
   throwing_div               = document.createElement( "div" );
   throwing_div.id            = "throwing_div";
@@ -677,12 +623,6 @@ function handle_2d( )
   
   handle_power_div( );
   
-  handle_round_div( );
-  
-  handle_score_div( );
-  
-  handle_game_reset( );
-  
 }
 
 function handle_3d( )
@@ -933,8 +873,6 @@ function on_mouse_up( event )
                    bowling_ball_origin[ 1 ], 
                    bowling_ball_origin[ 2 ] + 5 ) );
   
-  total_throws += 1;
-  
   current_round_throws += 1;
   
   bowling_ball_thrown = true;
@@ -1109,8 +1047,6 @@ function monitor_bowling_pins( )
       
       reset_bowling_ball( );
   
-      round += 1;
-      
       current_round_throws = 0;
       
     }, 10 );
@@ -1278,122 +1214,6 @@ function handle_power_div( )
       }
         
     }
-    
-  }
-  
-}
-
-function handle_round_div( )
-{
-  
-  round_div.innerHTML = "Round: " + round;
-  
-}
-
-function handle_score_div( )
-{
-  
-  if ( total_throws == 0 )
-  {
-    
-    var score = Math.floor( round / 1 * 100 );
-    
-    if ( score > 100 ) score = 100;
-    
-    if ( score < 0 ) score = 0;
-    
-    score_div.innerHTML = "Score: " + score + "%";
-    
-  }
-  else
-  {
-    
-    var score = Math.floor( round / total_throws * 100 );
-    
-    if ( score > 100 ) score = 100;
-    
-    if ( score < 0 ) score = 0;
-  
-    score_div.innerHTML = "Score: " + score + "%";
-    
-  }
-  
-}
-
-function handle_game_reset( )
-{
-  
-  if ( round == 11 )
-  {
-    
-    play = false;
-    
-    reset_bowling_pins( );
-    
-    strike_div.style.visibility = "hidden";
-    
-    var score = Math.floor( round / total_throws * 100 );
-    
-    if ( score > 100 ) score = 100;
-    
-    if ( score < 0 )   score = 0;
-    
-    var kuddos;
-    
-    if ( score <= 10 )
-    {
-      
-      kuddos = "Yikes...";
-      
-    }
-    else if ( score <= 50 )
-    {
-      
-      kuddos = "Meh.";
-      
-    }
-    else if ( score <= 80 )
-    {
-      
-      kuddos = "Awesome.";
-      
-    }
-    else
-    {
-      
-      kuddos = "Yowza!";
-      
-    }
-    
-    final_score_div.innerHTML = "Final Score:<br>" + score + "%<br>" + kuddos;
-    
-    final_score_div.style.visibility = "visible";
-    
-    round_div.style.visibility = "hidden";
-    
-    score_div.style.visibility = "hidden";
-    
-    power_div.style.visibility = "hidden";
-    
-    window.setTimeout( function ( ) { 
-      
-      final_score_div.style.visibility = "hidden"; 
-      
-      round_div.style.visibility = "visible";
-    
-      score_div.style.visibility = "visible";
-      
-      power_div.style.visibility = "visible";
-      
-      play = true;
-      
-    }, 6000 );
-    
-    round = 1;
-    
-    total_throws = 0;
-    
-    current_round_throws = 0;
     
   }
   
