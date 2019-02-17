@@ -535,7 +535,7 @@ function initialize_3d()
 			mesh.rotation.z = Math.PI;
 			scene.add( mesh );
 			
-			var mass = 7;
+			var mass = 10;
 			var box_body = new CANNON.RigidBody( mass, 
 							     new CANNON.Box( new CANNON.Vec3( 3, 3, 10 ) ), 
 							     bowling_pin_material );
@@ -572,7 +572,7 @@ function initialize_3d()
 		mesh.position.set( bowling_ball_origin[ 0 ], bowling_ball_origin[ 1 ], bowling_ball_origin[ 2 ] );
 		scene.add( mesh );
 		
-		var mass = 10, radius = 5;
+		var mass = 15, radius = 5;
 		var sphere_shape = new CANNON.Sphere( radius );
 		sphere_body = new CANNON.RigidBody( mass, sphere_shape, bowling_ball_material );
 		sphere_body.position.set( mesh.position.x, mesh.position.y, mesh.position.z );
