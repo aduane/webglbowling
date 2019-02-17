@@ -24,17 +24,11 @@ var current_round_throws = 0;
 
 var play   = false;
 
-// System settings globals.
-
-var system_settings_level = 2;
-
-var settings_div, low_div, medium_div, high_div;
-
 // Audio globals.
 
 var audio_on = false;
 
-var background_track, roll_sound_effect, hit_sound_effect, drop_sound_effect, strike_sound_effect, wind_sound_effect, laugh_sound_effect, fail_sound_effect, applause1_sound_effect, applause2_sound_effect;
+var background_track, roll_sound_effect, hit_sound_effect, drop_sound_effect, strike_sound_effect;
 
 var AUDIO_ON_SYMBOL  = "<span class='lettier-icon-audio_on'></span>";
 var AUDIO_OFF_SYMBOL = "<span class='lettier-icon-audio_off'></span>";
@@ -77,9 +71,7 @@ var bowling_pin_view = {
         look_at:  { x: 0, y: -195, z:  0 }
 };
 
-var spot_light, runway_light1, runway_light2, runway_light3;
-
-var arena_sphere;
+var spot_light
 
 var bowling_ball;
 
@@ -107,11 +99,7 @@ var bowling_ball_damping = 0.1;
 var bowling_ball_loaded = false;
 var bowling_ball_last_updated_position = bowling_ball_origin;
 
-var apply_wind_gust = false;
-
 var flicker_spot_light_time = ( new Date( ) ).valueOf( ) + random_float_in_range( 0, 1000 );
-
-var last_glow_runway_lights_time = ( new Date( ) ).valueOf( );
 
 var bowling_ball_thrown = false;
 
@@ -133,102 +121,6 @@ var switching_view = false;
 var textures_loaded = 0;
 
 var number_of_textures = 0;
-
-function set_system_settings_level( )
-{
-	
-	var y_spacing = 50;
-	var x_spacing = 40;
-	
-	settings_div               = document.createElement( "div" );
-	settings_div.id            = "settings_div";
-	settings_div.className     = "settings_div";
-	settings_div.innerHTML     = "Computer Power:";
-	document.body.appendChild( settings_div );
-	
-	settings_div.style.top        = ( ( window.innerHeight / 2 ) - ( settings_div.clientHeight / 2 ) ) + "px";
-	settings_div.style.left       = ( ( window.innerWidth  / 2 ) - ( settings_div.clientWidth  / 2 ) ) + "px";
-	settings_div.style.visibility = "visible";
-	
-	medium_div               = document.createElement( "div" );
-	medium_div.id            = "medium_div";
-	medium_div.className     = "medium_div";
-	medium_div.innerHTML     = "MEDIUM";
-	document.body.appendChild( medium_div );
-	
-	medium_div.style.top        = settings_div.offsetTop + settings_div.clientHeight + y_spacing + "px";
-	medium_div.style.left       = ( ( window.innerWidth  / 2 ) - ( medium_div.clientWidth  / 2 ) ) + "px";
-	medium_div.style.visibility = "visible";
-	
-	low_div               = document.createElement( "div" );
-	low_div.id            = "low_div";
-	low_div.className     = "low_div";
-	low_div.innerHTML     = "LOW";
-	document.body.appendChild( low_div );
-	
-	low_div.style.top        = settings_div.offsetTop + settings_div.clientHeight + y_spacing + "px";
-	low_div.style.left       = medium_div.offsetLeft  - low_div.clientWidth - x_spacing + "px";
-	low_div.style.visibility = "visible";
-	
-	high_div               = document.createElement( "div" );
-	high_div.id            = "high_div";
-	high_div.className     = "high_div";
-	high_div.innerHTML     = "HIGH";
-	document.body.appendChild( high_div );
-	
-	high_div.style.top        = settings_div.offsetTop + settings_div.clientHeight + y_spacing + "px";
-	high_div.style.left       = medium_div.offsetLeft  + medium_div.clientWidth + x_spacing + "px";
-	high_div.style.visibility = "visible";
-	
-	low_div.onclick = function ( ) {
-		
-		document.body.removeChild( settings_div );
-		
-		document.body.removeChild( medium_div );
-		
-		document.body.removeChild( high_div );
-		
-		document.body.removeChild( low_div );
-		
-		system_settings_level = 0;
-		
-		initialize( );
-		
-	}
-	
-	medium_div.onclick = function ( ) {
-		
-		document.body.removeChild( settings_div );
-		
-		document.body.removeChild( high_div );
-		
-		document.body.removeChild( low_div );
-		
-		document.body.removeChild( medium_div );
-		
-		system_settings_level = 1;
-		
-		initialize( );
-		
-	}
-	
-	high_div.onclick = function ( ) {
-		
-		document.body.removeChild( settings_div );
-		
-		document.body.removeChild( low_div );
-		
-		document.body.removeChild( medium_div );
-		
-		document.body.removeChild( high_div );
-		
-		system_settings_level = 2;
-		
-		initialize( );
-		
-	}
-	
-}
 
 function initialize( )
 {
@@ -310,46 +202,6 @@ function initialize_audio( )
 		
 		strike_sound_effect.mute( );
 		
-		wind_sound_effect = new buzz.sound( "assets/audio/wind", { formats: [ "ogg", "mp3" ] } );
-		
-		wind_sound_effect.setVolume( 50 );
-		
-		wind_sound_effect.load( );
-		
-		wind_sound_effect.mute( );
-		
-		laugh_sound_effect = new buzz.sound( "assets/audio/laugh", { formats: [ "ogg", "mp3" ] } );
-		
-		laugh_sound_effect.setVolume( 100 );
-		
-		laugh_sound_effect.load( );
-		
-		laugh_sound_effect.mute( );
-		
-		fail_sound_effect = new buzz.sound( "assets/audio/fail", { formats: [ "ogg", "mp3" ] } );
-		
-		fail_sound_effect.setVolume( 100 );
-		
-		fail_sound_effect.load( );
-		
-		fail_sound_effect.mute( );
-		
-		applause1_sound_effect = new buzz.sound( "assets/audio/applause1", { formats: [ "ogg", "mp3" ] } );
-		
-		applause1_sound_effect.setVolume( 100 );
-		
-		applause1_sound_effect.load( );
-		
-		applause1_sound_effect.mute( );
-		
-		applause2_sound_effect = new buzz.sound( "assets/audio/applause2", { formats: [ "ogg", "mp3" ] } );
-		
-		applause2_sound_effect.setVolume( 100 );
-		
-		applause2_sound_effect.load( );
-		
-		applause2_sound_effect.mute( );
-	
 		background_track = new buzz.sound( "assets/audio/background_track", { formats: [ "ogg", "mp3" ] } );
 		
 		background_track.setVolume( 30 );
@@ -376,16 +228,6 @@ function initialize_audio( )
 				
 				strike_sound_effect.mute( );
 				
-				wind_sound_effect.mute( );
-				
-				laugh_sound_effect.mute( );
-				
-				fail_sound_effect.mute( );
-				
-				applause1_sound_effect.mute( );
-				
-				applause2_sound_effect.mute( );				
-				
 				audio_on = false;
 				
 			}			
@@ -404,16 +246,6 @@ function initialize_audio( )
 				drop_sound_effect.unmute( );
 				
 				strike_sound_effect.unmute( );
-				
-				wind_sound_effect.unmute( );
-				
-				laugh_sound_effect.unmute( );
-				
-				fail_sound_effect.unmute( );
-				
-				applause1_sound_effect.unmute( );
-				
-				applause2_sound_effect.unmute( );	
 				
 				audio_on = true;
 				
@@ -621,47 +453,6 @@ function initialize_3d()
 	
 	var loader = new THREE.JSONLoader( true );
 	
-	// The arena sphere enclosure.
-	
-	number_of_textures += 1;
-	
-	loader.load( "assets/models/arena_sphere.js", function( geometry, material ) {
-		
-		if ( system_settings_level == 0 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/arena_sphere_low.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 1 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/arena_sphere_medium.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 2 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/arena_sphere.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		
-		var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
-		
-		if ( system_settings_level > 0 )
-		{
-			
-			mesh.castShadow     = false;
-			mesh.receiveShadow  = true;
-			
-		}
-		
-		scene.add( mesh );
-		
-		arena_sphere = mesh;
-
-	}, "assets/models/textures/" );
-	
 	// The bowling pin bay mesh.
 	
 	number_of_textures += 1;
@@ -670,34 +461,9 @@ function initialize_3d()
 		
 		material.shading = THREE.FlatShading;
 		
-		if ( system_settings_level == 0 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_bay_low.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 1 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_bay_medium.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 2 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_bay.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
+		material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_bay.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
 		
 		var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
-		
-		if ( system_settings_level > 0 )
-		{
-			
-			mesh.castShadow     = true;
-			mesh.receiveShadow  = true;
-			
-		}
 		
 		scene.add( mesh );
 
@@ -709,38 +475,14 @@ function initialize_3d()
 	
 	loader.load( "assets/models/floor.js", function( geometry, material ) {
 		
-		if ( system_settings_level == 0 )
-		{
 			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/hexagons_low.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 1 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/hexagons_medium.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 2 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/hexagons.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}		
+		material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/boards.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
 		
 		material[ 0 ].map.wrapS = THREE.RepeatWrapping;
 		material[ 0 ].map.wrapT = THREE.RepeatWrapping;
 		material[ 0 ].map.repeat.set( 2, 2 );
 		
 		var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
-		
-		if ( system_settings_level > 0 )
-		{
-		
-			mesh.castShadow    = false;
-			mesh.receiveShadow = true;
-		
-		}
 		
 		scene.add( mesh );
 		
@@ -759,34 +501,10 @@ function initialize_3d()
 	
 	loader.load( "assets/models/logo.js", function( geometry, material ) {
 		
-		if ( system_settings_level == 0 )
-		{
 			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/logo_billboard_low.png", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
+		material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/logo_billboard.png", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
 			
-		}
-		else if ( system_settings_level == 1 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/logo_billboard_medium.png", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 2 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/logo_billboard_medium.png", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		
 		var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
-		
-		if ( system_settings_level > 0 )
-		{
-			
-			mesh.castShadow    = false;
-			mesh.receiveShadow = true;
-		
-		}
 		
 		scene.add( mesh );	
 
@@ -805,34 +523,11 @@ function initialize_3d()
 	
 		loader.load( "assets/models/bowling_pin.js", function( geometry, material ) {
 			
-			if ( system_settings_level == 0 )
-			{
-				
-				material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_low.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-				
-			}
-			else if ( system_settings_level == 1 )
-			{
-				
-				material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_medium.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-				
-			}
-			else if ( system_settings_level == 2 )
-			{
-				
-				material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-				
-			}
+			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
 			
 			var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
-			
-			if ( system_settings_level > 0 )
-			{
-				
-				mesh.castShadow    = true;
-				mesh.receiveShadow = true;
-
-			}
+			mesh.castShadow    = true;
+			mesh.receiveShadow = true;
 			
 			mesh.position.set( bowling_pin_positions[ position_index ][ 0 ], 
 					   bowling_pin_positions[ position_index ][ 1 ], 
@@ -867,34 +562,12 @@ function initialize_3d()
 	
 	loader.load( "assets/models/bowling_ball.js", function( geometry, material ) {
 		
-		if ( system_settings_level == 0 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_ball_low.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 1 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_ball_medium.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 2 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_ball.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		
+		material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_ball.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
+
 		var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
 		
-		if ( system_settings_level > 0 )
-		{
-			
-			mesh.castShadow    = true;
-			mesh.receiveShadow = true;
-			
-		}
+		mesh.castShadow    = true;
+		mesh.receiveShadow = true;
 		
 		mesh.position.set( bowling_ball_origin[ 0 ], bowling_ball_origin[ 1 ], bowling_ball_origin[ 2 ] );
 		scene.add( mesh );
@@ -918,34 +591,9 @@ function initialize_3d()
 	
 	loader.load( "assets/models/bumpers.js", function( geometry, material ) {
 		
-		if ( system_settings_level == 0 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bumpers_low.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 1 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bumpers_medium.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
-		else if ( system_settings_level == 2 )
-		{
-			
-			material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bumpers.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
-			
-		}
+		material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bumpers.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
 		
 		var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
-		
-		if ( system_settings_level > 0 )
-		{
-			
-			mesh.castShadow     = true;
-			mesh.receiveShadow  = true;
-			
-		}
 		
 		scene.add( mesh );
 
@@ -953,113 +601,41 @@ function initialize_3d()
 	
 	// Lights.
 	
-	var ambient_light = new THREE.AmbientLight( 0x110111 ); // soft white light
+	var ambient_light = new THREE.AmbientLight( 0x404040 );
 	scene.add( ambient_light );
 	
-	if ( system_settings_level > 1 )
-	{
-	
-		var point_light1  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
-		point_light1.position.set( -22, -180, 45 );
-		scene.add( point_light1 );
-		
-		var point_light2  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
-		point_light2.position.set(  22, -180, 45 );
-		scene.add( point_light2 );
-	
-	}
+  var point_light1  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
+  point_light1.position.set( -22, -180, 45 );
+  scene.add( point_light1 );
+  
+  var point_light2  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
+  point_light2.position.set(  22, -180, 45 );
+  scene.add( point_light2 );
 	
 	var point_light3  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
 	point_light3.position.set(   0, -180, 45 );
 	scene.add( point_light3 );
 	
-	if ( system_settings_level > 0 )
-	{
+  var point_light4  = new THREE.PointLight( 0xEEF78D, 1.1, 140 );
+  point_light4.position.set(   0, -160, 55 );
+  scene.add( point_light4 );
 	
-		var point_light4  = new THREE.PointLight( 0xEEF78D, 1.1, 140 );
-		point_light4.position.set(   0, -160, 55 );
-		scene.add( point_light4 );
-		
-	}
-	
-	if ( system_settings_level == 2 )
-	{
-	
-		runway_light1  = new THREE.PointLight( 0xaaaaFF, 50.0, 6 );
-		runway_light1.position.set(   0, 240, 5 );
-		scene.add( runway_light1 );
-		
-		runway_light2  = new THREE.PointLight( 0x88aaFF, 50.0, 6 );
-		runway_light2.position.set(  -21, 250, 5 );
-		scene.add( runway_light2 );
-		
-		runway_light3  = new THREE.PointLight( 0x88aaFF, 50.0, 6 );
-		runway_light3.position.set(   21, 250, 5 );
-		scene.add( runway_light3 );
-		
-	}
-	else if ( system_settings_level == 1 )
-	{
-	
-		runway_light1  = new THREE.PointLight( 0xaaaaFF, 50.0, 6 );
-		runway_light1.position.set(   0, 240, 5 );
-		scene.add( runway_light1 );
-		
-	}
-	
-	if ( system_settings_level == 0 )
-	{
-			
-		spot_light                     = new THREE.SpotLight( 0xFFF5BA, 1.0 );
-		spot_light.castShadow          = true;
-		spot_light.shadowCameraVisible = false;
-		spot_light.position.set( 200, 0, 300 );
-		spot_light.lookAt( -200, 0, 0 );
-		scene.add( spot_light );
-		
-	}
-	else if ( system_settings_level == 1 ) 
-	{
-		
-		renderer.shadowMapEnabled = true;
-		renderer.shadowMapSoft    = true;
-			
-		spot_light                     = new THREE.SpotLight( 0xFFF5BA, 1.0 );
-		spot_light.castShadow          = true;
-		spot_light.shadowMapWidth      = 256;
-		spot_light.shadowMapHeight     = 256;
-		spot_light.shadowCameraNear    = 10;
-		spot_light.shadowCameraFar     = 1050;
-		spot_light.shadowCameraFov     = 100;
-		spot_light.shadowBias          = 0.00008;
-		spot_light.shadowDarkness      = 0.5;
-		spot_light.shadowCameraVisible = false;
-		spot_light.position.set( 200, 0, 300 );
-		spot_light.lookAt( -200, 0, 0 );
-		scene.add( spot_light );
-		
-	}
-	else if ( system_settings_level == 2 )
-	{
-		
-		renderer.shadowMapEnabled = true;
-		renderer.shadowMapSoft    = true;
-			
-		spot_light                     = new THREE.SpotLight( 0xFFF5BA, 1.0 );
-		spot_light.castShadow          = true;
-		spot_light.shadowMapWidth      = 4096;
-		spot_light.shadowMapHeight     = 4096;
-		spot_light.shadowCameraNear    = 10;
-		spot_light.shadowCameraFar     = 1050;
-		spot_light.shadowCameraFov     = 100;
-		spot_light.shadowBias          = 0.00008;
-		spot_light.shadowDarkness      = 0.5;
-		spot_light.shadowCameraVisible = false;
-		spot_light.position.set( 200, 0, 300 );
-		spot_light.lookAt( -200, 0, 0 );
-		scene.add( spot_light );
-		
-	}	
+  renderer.shadowMapEnabled = true;
+  renderer.shadowMapSoft    = true;
+    
+  spot_light                     = new THREE.SpotLight( 0xFFF5BA, 1.0 );
+  spot_light.castShadow          = true;
+  spot_light.shadowMapWidth      = 4096;
+  spot_light.shadowMapHeight     = 4096;
+  spot_light.shadowCameraNear    = 10;
+  spot_light.shadowCameraFar     = 1050;
+  spot_light.shadowCameraFov     = 100;
+  spot_light.shadowBias          = 0.00008;
+  spot_light.shadowDarkness      = 0.5;
+  spot_light.shadowCameraVisible = false;
+  spot_light.position.set( 200, 0, 300 );
+  spot_light.lookAt( -200, 0, 0 );
+  scene.add( spot_light );
 	
 	canvas = renderer.domElement;
 
@@ -1075,24 +651,7 @@ function initialize_3d()
 	world.gravity.set( 0, 0, -120 );
 	world.broadphase = new CANNON.NaiveBroadphase( );
 	
-	if ( system_settings_level == 0 )
-	{
-		
-		world.solver.iterations = 3;
-		
-	}
-	else if ( system_settings_level == 1 ) 
-	{
-		
-		world.solver.iterations = 5;
-		
-	}
-	else if ( system_settings_level == 2 )
-	{
-		
-		world.solver.iterations = 10;
-		
-	}
+	world.solver.iterations = 10;
 	
 	// Bowling pin bay physics bodies.
 	
@@ -1281,11 +840,7 @@ function handle_3d( )
 	
 	if ( floor_loaded == false || bowling_ball_loaded == false ) return; 
 	
-	handle_arena_sphere( );
-	
 	handle_lights( );
-	
-	handle_wind( );
 	
 	physics_step( );
 	
@@ -1579,8 +1134,6 @@ function on_mouse_up( event )
 	if ( bowling_ball_thrown == true )
 	{
 
-		apply_wind_gust = false;
-		
 		reset_bowling_ball( );
 		
 		return;
@@ -1677,20 +1230,6 @@ function on_mouse_up( event )
 		
 	}
 	
-	if ( random_float_in_range( 0, 100 ) <= 5 )
-	{
-		
-		apply_wind_gust = true;
-		
-		window.setTimeout( function ( ) { 
-			
-			wind_sound_effect.stop( );
-			wind_sound_effect.play( );
-			
-		}, 100 );
-		
-	}
-
 }
 
 function on_resize( )
@@ -1708,27 +1247,6 @@ function on_resize( )
 	audio_div.style.left       = ( window.innerWidth - 120 ) + "px";
 }
 
-function handle_wind( )
-{
-	
-	var y = bowling_ball[ 1 ].position.y;	
-	
-	if ( bowling_ball_thrown == true && y > -165 && apply_wind_gust )
-	{
-		
-		
-		var x = bowling_ball_origin[ 0 ];
-		var z = bowling_ball_origin[ 2 ];
-		
-		bowling_ball[ 0 ].applyForce( new CANNON.Vec3( 2000, 0.0, 0.0 ), 
-				              new CANNON.Vec3( bowling_ball_origin[ 0 ], 
-						               bowling_ball_origin[ 1 ], 
-						               bowling_ball_origin[ 2 ] + 5 ) );
-		
-	}
-	
-}
-
 function monitor_bowling_ball( )
 {
 	
@@ -1739,8 +1257,6 @@ function monitor_bowling_ball( )
 	     isNaN( bowling_ball[ 1 ].position.y ) ||
 	     isNaN( bowling_ball[ 1 ].position.z )  )
 	{
-		
-		apply_wind_gust = false;
 		
 		reset_bowling_ball( );
 		
@@ -2111,8 +1627,6 @@ function handle_game_reset( )
 		
 		play = false;
 		
-		apply_wind_gust = false;
-		
 		reset_bowling_pins( );
 		
 		strike_div.style.visibility = "hidden";
@@ -2132,19 +1646,11 @@ function handle_game_reset( )
 			
 			kuddos = "Yikes...";
 			
-			laugh_sound_effect.stop( );
-			
-			laugh_sound_effect.play( );
-			
 		}
 		else if ( score <= 50 )
 		{
 			
 			kuddos = "Meh.";
-			
-			fail_sound_effect.stop( );
-			
-			fail_sound_effect.play( );
 			
 		}
 		else if ( score <= 80 )
@@ -2152,19 +1658,11 @@ function handle_game_reset( )
 			
 			kuddos = "Awesome.";
 			
-			applause1_sound_effect.stop( );
-			
-			applause1_sound_effect.play( );
-			
 		}
 		else
 		{
 			
 			kuddos = "Yowza!";
-			
-			applause2_sound_effect.stop( );
-			
-			applause2_sound_effect.play( );
 			
 		}
 		
@@ -2204,17 +1702,6 @@ function handle_game_reset( )
 	
 }
 
-function handle_arena_sphere( )
-{
-	
-	if ( arena_sphere == undefined ) return;
-	
-	arena_sphere.rotation.z += 0.001;
-	
-	if ( arena_sphere.rotation.z >= Math.PI * 2 ) arena_sphere.rotation.z = 0.0;
-	
-}
-
 function handle_lights( )
 {
 	
@@ -2236,54 +1723,6 @@ function handle_lights( )
 			
 		}
 		
-	}
-	
-	if ( system_settings_level == 0 ) return;
-
-	var glow_time_delta = time - last_glow_runway_lights_time;
-	
-	var intensity = ( -1 / 25 ) * glow_time_delta + 50;
-	
-	if ( intensity < 0 )
-	{
-		intensity = 0;
-		
-		last_glow_runway_lights_time = ( new Date( ) ).valueOf( );
-		
-	}
-	
-	if ( system_settings_level == 1 )
-	{
-		
-		runway_light1.intensity = intensity;
-		
-		if ( runway_light1.position.y <= -165 )
-		{
-			runway_light1.position.y = 240;
-			
-		}
-		
-		runway_light1.position.y -= 2.5;
-		
-	}
-	else if ( system_settings_level == 2 )
-	{
-		
-		runway_light1.intensity = intensity;
-		runway_light2.intensity = intensity;
-		runway_light3.intensity = intensity;
-		
-		if ( runway_light1.position.y <= -165 )
-		{
-			runway_light1.position.y = 240;
-			runway_light2.position.y = 250;
-			runway_light3.position.y = 250;
-			
-		}
-		
-		runway_light1.position.y -= 2.5;
-		runway_light2.position.y -= 2.0;
-		runway_light3.position.y -= 2.0;
 	}
 	
 }
@@ -2318,7 +1757,7 @@ function switch_to_bowling_pin_view( )
 	
 }
 
-window.onload = set_system_settings_level;
+window.onload = initialize;
 
 // Utilities.
 
