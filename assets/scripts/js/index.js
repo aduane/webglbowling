@@ -9,7 +9,6 @@
  * 
  *      Three.js
  *      Cannon.js
- *      Tween.js
  *      Buzz.js
  * 
  */
@@ -667,19 +666,10 @@ function draw_frame( )
   
   requestAnimationFrame( draw_frame );
   
-  handle_tween( );
-  
   handle_2d( );
   
   handle_3d( );
 
-}
-
-function handle_tween( )
-{
-  
-  TWEEN.update( );
-  
 }
 
 function handle_2d( )
@@ -1234,37 +1224,6 @@ function monitor_bowling_pins( )
       reset_bowling_ball( );
   
       round += 1;
-      
-      if ( current_round_throws == 1 )
-      {
-        
-        strike_sound_effect.stop( );
-        
-        strike_sound_effect.play( );
-        
-        strike_div.style.visibility = "visible";
-        
-        var s     = { o: 0.0 };
-        var f     = { o: 1.0 };
-        var tween = new TWEEN.Tween( s ).to( f, 1000 );
-        
-        tween.onUpdate( function( ) {
-          
-          strike_div.style.opacity = "" + s.o + "";
-        
-        } );
-        
-        tween.onComplete( function( ) {
-          
-          strike_div.style.visibility = "hidden";
-        
-        } );
-        
-        tween.easing( TWEEN.Easing.Bounce.InOut );
-        
-        tween.start( );
-        
-      }
       
       current_round_throws = 0;
       
