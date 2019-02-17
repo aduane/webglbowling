@@ -787,7 +787,7 @@ function track_mouse( )
         bowling_ball[ 0 ].force.set( 0, 0, 1200 );
         
       }
-       else if ( bowling_ball[ 0 ].position.x <= -35.0 )
+      else if ( bowling_ball[ 0 ].position.x <= -35.0 )
       {
         
         bowling_ball[ 1 ].position.x = -34.9;
