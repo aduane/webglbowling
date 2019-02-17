@@ -26,7 +26,7 @@
 		"colorSpecular" : [0.10000000149011612, 0.10000000149011612, 0.10000000149011612],
 		"depthTest" : true,
 		"depthWrite" : true,
-		"mapDiffuse" : "hexagons.jpg",
+		"mapDiffuse" : "boards.jpg",
 		"mapDiffuseWrap" : ["repeat", "repeat"],
 		"shading" : "Phong",
 		"specularCoef" : 50,
