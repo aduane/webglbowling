@@ -1,4 +1,5 @@
 /*
+ * Original Game By
  * David Lettier (C) 2014.
  * 
  * http://www.lettier.com/
@@ -17,24 +18,19 @@
 
 var current_round_throws = 0;
 
-var play   = false;
+var play   = true;
 
 // Audio globals.
 
-var audio_on = false;
+var audio_on = true;
 
-var background_track, roll_sound_effect, hit_sound_effect, drop_sound_effect;
-
-var AUDIO_ON_SYMBOL  = "<span class='lettier-icon-audio_on'></span>";
-var AUDIO_OFF_SYMBOL = "<span class='lettier-icon-audio_off'></span>";
-
-var audio_div;
+var background_track, roll_sound_effect, hit_sound_effect;
 
 var hit_sound_effect_played = ( new Date( ) ).valueOf( );
 
 // 2D globals.
 
-var loading_div, start_div, power_div, throwing_div;
+var loading_div, throwing_div;
 
 var mouse_positions = [ ];
 
@@ -53,7 +49,7 @@ var canvas;
 var camera, scene, renderer, projector;
 
 var throwing_view = { 
-  position: { x: 0, y: 290, z: 60 },
+  position: { x: 0, y: 290, z: 55 },
   look_at:  { x: 0, y:   0, z: 0  }
 };
 
@@ -97,8 +93,6 @@ var throwing_target;
 
 var floor_loaded = false;
 
-var max_throwing_power = 200000;
-
 var world;
 
 var timers = [ ];
@@ -110,119 +104,51 @@ var textures_loaded = 0;
 
 var number_of_textures = 0;
 
-function initialize( )
-{
-  
-  initialize_2d( );
-  
-  initialize_3d( );
-  
-  initialize_audio( );
-  
-  initialize_opening_sequence( );
-  
+function initialize() {
+  initialize_2d();
+  initialize_3d();
+  initialize_audio();
+  initialize_opening_sequence();
 }
 
-function initialize_audio( )
-{
-  
-  /*
-    Background track:
-    "The Elevator Bossa Nova" Bensound (http://www.bensound.com/) 
-    Licensed under Creative Commons
-    
-  */
-  
-  audio_div              = document.createElement( "div" );
-  audio_div.id           = "audio_div";
-  audio_div.className    = "audio_div";
-  audio_div.innerHTML    = AUDIO_OFF_SYMBOL;
-  audio_div.title        = "Turn audio on.";
-  document.body.appendChild( audio_div );
-  
-  audio_div.style.top        = window.innerHeight + "px";
-  audio_div.style.left       = ( window.innerWidth - 120 ) + "px";
-  audio_div.style.visibility = "visible";
-  
-  window.setTimeout( function ( ) {
-    
-    roll_sound_effect = new buzz.sound( "assets/audio/roll", { formats: [ "ogg", "mp3" ] } );
-    
+function initialize_audio() {
+  window.setTimeout( function () {
+    roll_sound_effect = new buzz.sound( "assets/audio/ball_rolling", { formats: [ "ogg", "mp3" ] } );
     roll_sound_effect.setVolume( 100 );
+    roll_sound_effect.load();
+
+    // pins_hit.ogg shortened from
+    // https://freesound.org/people/Tomlija/sounds/99563/
+    // https://creativecommons.org/licenses/by/3.0/
     
-    roll_sound_effect.load( );
-    
-    roll_sound_effect.mute( );
-    
-    hit_sound_effect = new buzz.sound( "assets/audio/hit", { formats: [ "ogg", "mp3" ] } );
-    
+    hit_sound_effect = new buzz.sound( "assets/audio/pins_hit", { formats: [ "ogg", "mp3" ] } );
     hit_sound_effect.setVolume( 100 );
+    hit_sound_effect.load();
     
-    hit_sound_effect.load( );
-    
-    hit_sound_effect.mute( );
-    
-    drop_sound_effect = new buzz.sound( "assets/audio/drop", { formats: [ "ogg", "mp3" ] } );
-    
-    drop_sound_effect.setVolume( 100 );
-    
-    drop_sound_effect.load( );
-    
-    drop_sound_effect.mute( );
-    
-    background_track = new buzz.sound( "assets/audio/background_track", { formats: [ "ogg", "mp3" ] } );
-    
-    background_track.setVolume( 30 );
-    
-    background_track.load( ).loop( ).play( );
-    
-    background_track.mute( );
-    
-    audio_div.onclick = function ( ) {
-      
-      if ( audio_on == true )
-      {
-        
-        audio_div.innerHTML = AUDIO_OFF_SYMBOL;
-        audio_div.title     = "Turn audio on.";
-        
-        background_track.mute( );
-        
-        roll_sound_effect.mute( );
-        
-        hit_sound_effect.mute( );
-        
-        drop_sound_effect.mute( );
-        
-        audio_on = false;
-        
-      }      
-      else if ( audio_on == false )
-      {
-        
-        audio_div.innerHTML = AUDIO_ON_SYMBOL;
-        audio_div.title     = "Turn audio off.";
-        
-        background_track.unmute( );
-        
-        roll_sound_effect.unmute( );
-        
-        hit_sound_effect.unmute( );
-        
-        drop_sound_effect.unmute( );
-        
-        audio_on = true;
-        
-      }
-      
-    }
-    
+    background_track = new buzz.sound( "assets/audio/ambient_background", { formats: [ "ogg" ] } );
+    background_track.setVolume( 100 );
+    background_track.load().loop().play();
   }, 6500 );
-  
 }
 
-function initialize_2d( )
-{
+function toggle_audio() {
+  if ( audio_on == true ) {
+    background_track.mute();
+    roll_sound_effect.mute();
+    hit_sound_effect.mute();
+    
+    audio_on = false;
+  }      
+  else if ( audio_on == false ) {
+    background_track.unmute();
+    roll_sound_effect.unmute();
+    hit_sound_effect.unmute();
+    
+    audio_on = true;
+  }
+}
+
+function initialize_2d() {
   
   loading_div              = document.createElement( "div" );
   loading_div.id           = "loading_div";
@@ -234,39 +160,6 @@ function initialize_2d( )
   loading_div.style.left       = ( ( window.innerWidth  / 2 ) - ( loading_div.clientWidth  / 2 ) ) + "px";
   loading_div.style.visibility = "visible";  
   
-  start_div              = document.createElement( "div" );
-  start_div.id           = "start_div";
-  start_div.className    = "start_div";
-  start_div.innerHTML    = "START";
-  start_div.style.cursor = "pointer";
-
-  document.body.appendChild( start_div );
-  
-  start_div.style.top        = window.innerHeight / 2 + "px";
-  start_div.style.left       = ( ( window.innerWidth  / 2 ) - ( start_div.clientWidth  / 2 ) ) + "px";
-  start_div.style.visibility = "hidden";
-  
-  start_div.onclick = function ( ) {
-    
-    start_div.onmouseover = null;
-    start_div.onmouseout  = null;
-    
-    play = true;
-    
-    canvas.className = "";
-    
-    start_div.style.visibility        = "hidden";
-    
-  };
-  
-  power_div              = document.createElement( "div" );
-  power_div.id           = "power_div";
-  power_div.className    = "power_div";
-  power_div.innerHTML    = "&nbsp;";
-  power_div.style.width  = 200 + "px";
-  power_div.style.height = 10 + "px";
-  document.body.appendChild( power_div );
-  
   throwing_div               = document.createElement( "div" );
   throwing_div.id            = "throwing_div";
   throwing_div.className     = "throwing_div";
@@ -277,8 +170,7 @@ function initialize_2d( )
   
 }
 
-function initialize_3d() 
-{
+function initialize_3d() {
 
   // The camera.
   
@@ -291,7 +183,7 @@ function initialize_3d()
   
   // The scene.
 
-  scene = new THREE.Scene( );
+  scene = new THREE.Scene();
   
   // The renderer.
   
@@ -324,7 +216,7 @@ function initialize_3d()
     
     material.shading = THREE.FlatShading;
     
-    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_bay.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
+    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin_bay.jpg", THREE.UVMapping, function () { textures_loaded += 1; } );
     
     var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
     
@@ -339,7 +231,7 @@ function initialize_3d()
   loader.load( "assets/models/floor.js", function( geometry, material ) {
     
       
-    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/boards.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
+    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/boards.jpg", THREE.UVMapping, function () { textures_loaded += 1; } );
     
     material[ 0 ].map.wrapS = THREE.RepeatWrapping;
     material[ 0 ].map.wrapT = THREE.RepeatWrapping;
@@ -366,12 +258,11 @@ function initialize_3d()
   
   number_of_textures += i;
   
-  while ( i-- )
-  {
+  while ( i-- ) {
   
     loader.load( "assets/models/bowling_pin.js", function( geometry, material ) {
       
-      material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
+      material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_pin.jpg", THREE.UVMapping, function () { textures_loaded += 1; } );
       
       var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
       mesh.castShadow    = true;
@@ -410,7 +301,7 @@ function initialize_3d()
   
   loader.load( "assets/models/bowling_ball.js", function( geometry, material ) {
     
-    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_ball.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
+    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bowling_ball.jpg", THREE.UVMapping, function () { textures_loaded += 1; } );
 
     var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
     
@@ -439,7 +330,7 @@ function initialize_3d()
   
   loader.load( "assets/models/bumpers.js", function( geometry, material ) {
     
-    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bumpers.jpg", THREE.UVMapping, function ( ) { textures_loaded += 1; } );
+    material[ 0 ].map = THREE.ImageUtils.loadTexture( "assets/models/textures/bumpers.jpg", THREE.UVMapping, function () { textures_loaded += 1; } );
     
     var mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial( material ) );
     
@@ -453,20 +344,12 @@ function initialize_3d()
   scene.add( ambient_light );
   
   var point_light1  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
-  point_light1.position.set( -22, -180, 45 );
+  point_light1.position.set(  22, -180, 45 );
   scene.add( point_light1 );
   
   var point_light2  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
-  point_light2.position.set(  22, -180, 45 );
+  point_light2.position.set(   0, -180, 45 );
   scene.add( point_light2 );
-  
-  var point_light3  = new THREE.PointLight( 0xC2E7F2, 0.8, 100 );
-  point_light3.position.set(   0, -180, 45 );
-  scene.add( point_light3 );
-  
-  var point_light4  = new THREE.PointLight( 0xEEF78D, 1.1, 140 );
-  point_light4.position.set(   0, -160, 55 );
-  scene.add( point_light4 );
   
   renderer.shadowMapEnabled = true;
   renderer.shadowMapSoft    = true;
@@ -495,9 +378,9 @@ function initialize_3d()
   
   // Physics world.
 
-  world = new CANNON.World( );
+  world = new CANNON.World();
   world.gravity.set( 0, 0, -120 );
-  world.broadphase = new CANNON.NaiveBroadphase( );
+  world.broadphase = new CANNON.NaiveBroadphase();
   
   world.solver.iterations = 10;
   
@@ -571,80 +454,44 @@ function initialize_3d()
   
   // Draw the first frame.
 
-  draw_frame( );
-
+  draw_frame();
 }
 
-function initialize_opening_sequence( )
-{
-  
-  if ( textures_loaded != number_of_textures )
-  {
-    
-    window.setTimeout( function ( ) {
-      
-      loading_div.style.opacity = "" + random_float_in_range( 0.1, 1.0 ) + "";
-    
-      initialize_opening_sequence( );
-      
+function initialize_opening_sequence() {
+  if ( textures_loaded != number_of_textures ) {
+    window.setTimeout( function () {
+      initialize_opening_sequence();
     }, 100 );
-    
-    return;
-    
   }
-  else
-  {
-    
+  else {
     loading_div.style.visibility = "hidden";
-    
+    camera.position.y = throwing_view.position.y;
+    camera.position.z = throwing_view.position.z;
+
+    camera.lookAt( new THREE.Vector3( 0, throwing_view.look_at.y, 0 ) );
   }
-  
-  camera.position.y = throwing_view.position.y;
-  camera.position.z = throwing_view.position.z;
-
-  camera.lookAt( new THREE.Vector3( 0, throwing_view.look_at.y, 0 ) );
-  start_div.style.visibility = "visible";
 }
   
 
-function draw_frame( ) 
-{
-  
+function draw_frame() {
   requestAnimationFrame( draw_frame );
-  
-  handle_2d( );
-  
-  handle_3d( );
-
+  handle_3d();
 }
 
-function handle_2d( )
-{
-  
-  handle_power_div( );
-  
-}
-
-function handle_3d( )
-{
-  
+function handle_3d() {
   if ( floor_loaded == false || bowling_ball_loaded == false ) return; 
   
-  physics_step( );
+  physics_step();
   
-  track_mouse( );
+  track_mouse();
   
-  monitor_bowling_ball( );
-  
-  monitor_bowling_pins( );
+  monitor_bowling_ball();
+  monitor_bowling_pins();
 
   renderer.render( scene, camera );
-  
 }
 
-function physics_step( )
-{
-
+function physics_step() {
   world.step( 1.0 / 60.0 );
 
   bowling_ball[ 0 ].position.copy(   bowling_ball[ 1 ].position   );
@@ -652,36 +499,22 @@ function physics_step( )
 
   var i = bowling_pins.length;
   
-  while ( i-- )
-  {
-    
+  while ( i-- ) {
     bowling_pins[ i ][ 0 ].position.copy(   bowling_pins[ i ][ 1 ].position   );
     bowling_pins[ i ][ 0 ].quaternion.copy( bowling_pins[ i ][ 1 ].quaternion );
-    
   }
-
 }
 
-function track_mouse( )
-{
-  
-  if ( bowling_ball_thrown == false )
-  {
-    
+function track_mouse() {
+  if ( bowling_ball_thrown == false ) {
     bowling_ball[ 0 ].velocity.set( 0, 0, 0 );
-      
     bowling_ball[ 0 ].angularVelocity.set( 0.0, 0.0, 0.0 );
-    
     bowling_ball[ 0 ].force.set( 0, 0, 1200 );
     
-    if ( mouse_is_down == false && mouse_positions.length > 2 && play == true )
-    {
-      
+    if ( mouse_is_down == false && mouse_positions.length > 2 && play == true ) {
       var mouse_position_3d = screen_position_2d_to_3d( mouse_positions[ mouse_positions.length - 1 ][ 0 ], mouse_positions[ mouse_positions.length - 1 ][ 1 ], bowling_ball[ 1 ].position.z );
       
-      if ( mouse_position_3d.y >= 177 && mouse_position_3d.y <= 201 )
-      {
-      
+      if ( mouse_position_3d.y >= 177 && mouse_position_3d.y <= 201 ) {
         var bx = bowling_ball[ 1 ].position.x;
         var by = bowling_ball[ 1 ].position.y;
         var bz = bowling_ball[ 1 ].position.z;
@@ -691,127 +524,84 @@ function track_mouse( )
         var s = xd / Math.abs( xd );
         
         bowling_ball[ 0 ].velocity.set( s * ( xd * xd ), 0, 0 );
-        
       }
       
-      if ( bowling_ball[ 0 ].position.x >= 35.0 )
-      {
-        
+      if ( bowling_ball[ 0 ].position.x >= 35.0 ) {
         bowling_ball[ 1 ].position.x = 34.9;
         
         bowling_ball[ 0 ].position.set( bowling_ball[ 1 ].position.x, 
                 bowling_ball[ 1 ].position.y, 
                 bowling_ball[ 1 ].position.z );
         bowling_ball[ 0 ].quaternion =  bowling_ball[ 1 ].quaternion;
-        
         bowling_ball[ 0 ].velocity.set( 0, 0, 0 );
-          
         bowling_ball[ 0 ].angularVelocity.set( 0.0, 0.0, 0.0 );
-        
         bowling_ball[ 0 ].force.set( 0, 0, 1200 );
-        
       }
-      else if ( bowling_ball[ 0 ].position.x <= -35.0 )
-      {
-        
+      else if ( bowling_ball[ 0 ].position.x <= -35.0 ) {
         bowling_ball[ 1 ].position.x = -34.9;
         
         bowling_ball[ 0 ].position.set( bowling_ball[ 1 ].position.x, 
                 bowling_ball[ 1 ].position.y, 
                 bowling_ball[ 1 ].position.z );
         bowling_ball[ 0 ].quaternion =  bowling_ball[ 1 ].quaternion;
-        
         bowling_ball[ 0 ].velocity.set( 0, 0, 0 );        
-          
         bowling_ball[ 0 ].angularVelocity.set( 0.0, 0.0, 0.0 );
-        
         bowling_ball[ 0 ].force.set( 0, 0, 1200 );
-        
       }
     }
 
     bowling_ball_last_updated_position = [ 
-      
       bowling_ball[ 1 ].position.x,
       bowling_ball[ 1 ].position.y,
       bowling_ball[ 1 ].position.z
-      
     ];
-
   }
-  
 }
 
 // Event callbacks.
-  
 
-function on_mouse_move( event )
-{
+function on_mouse_move( event ) {
   
   mouse_is_moving = true;
   
   mouse_positions.push( [ event.clientX, event.clientY ] );
   
-  if ( mouse_positions.length >= 100 )
-  {
-    
+  if ( mouse_positions.length >= 100 ) {
     mouse_positions = mouse_positions.splice( mouse_positions.length - 50, mouse_positions.length );
-    
   }
   
-  if ( mouse_is_down && on_mouse_down_mouse_on_ball )
-  {
+  if ( mouse_is_down && on_mouse_down_mouse_on_ball ) {
     // no-op
   }
-  else
-  {
-    
+  else {
     throwing_direction_arrow.position.z = -20;
     throwing_direction_arrow.setDirection( new THREE.Vector3( 0, 0, 0 ) );
     throwing_target.position.set( 0, 0, -20 );
-    
   }
-  
 }
 
-function on_mouse_down( event )
-{
-  
+function on_mouse_down( event ) {
   mouse_is_down = true;
-  
-  on_mouse_down_time = ( new Date( ) ).valueOf( );
-  
+
+  on_mouse_down_time = ( new Date() ).valueOf();
   on_mouse_down_position = [ event.clientX, event.clientY ];
   
-  if ( mouse_3d_intersection( event.clientX, event.clientY ).id == bowling_ball[ 1 ].id )
-  {
-  
+  if ( mouse_3d_intersection( event.clientX, event.clientY ).id == bowling_ball[ 1 ].id ) {
     on_mouse_down_mouse_on_ball = true;
-    
   }
-  else
-  {
-    
+  else {
     on_mouse_down_mouse_on_ball = false;
-    
   }
-
 }
 
-function on_mouse_up( event )
-{
-  
+function on_mouse_up( event ) {
   mouse_is_down = false;
   
   if ( play == false ) return;
   
-  if ( bowling_ball_thrown == true )
-  {
-
-    reset_bowling_ball( );
-    
+  if ( bowling_ball_thrown == true ) {
+    reset_bowling_ball();
     return;
-    
   }
   
   if ( on_mouse_down_mouse_on_ball == false ) return;
@@ -846,24 +636,17 @@ function on_mouse_up( event )
   
   var l = Math.sqrt( ( xd * xd ) + ( yd * yd ) );
   
-  if ( l != 0.0 )
-  {
+  if ( l != 0.0 ) {
     x = xd / l;
     y = yd / l;
-    
   }
   
-  if ( y > 0 )
-  {
-    
+  if ( y > 0 ) {
     y *= -1;
     x *= -1;
-    
   }
   
-  var power = calculate_power_level( )
-  
-  if ( power < 0 ) power = 0;
+  var power = 200000;
   
   var fx = x * power;
   var fy = y * power;
@@ -876,52 +659,29 @@ function on_mouse_up( event )
   current_round_throws += 1;
   
   bowling_ball_thrown = true;
-  
   switching_view = true;
     
-  var timer = window.setTimeout( function ( ) { switch_to_bowling_pin_view( ); }, 1200 );
-    
+  var timer = window.setTimeout( function () { switch_to_bowling_pin_view(); }, 1200 );
   timers.push( timer );
-    
-  clear_old_timers( );
+  clear_old_timers();
   
-  if ( power > 1 && l > 0.0001 )
-  {
-  
-    roll_sound_effect.stop( );
-
-    roll_sound_effect.play( );
-    
+  if ( power > 1 && l > 0.0001 ) {
+    roll_sound_effect.stop();
+    roll_sound_effect.play();
   }
-  else
-  {
-    
-    drop_sound_effect.stop( );
-    
-    drop_sound_effect.play( );
-    
-  }
-  
 }
 
-function on_resize( )
-{
-  
+function on_resize() {
   renderer.setSize( window.innerWidth, window.innerHeight );
 
   camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix( );
+  camera.updateProjectionMatrix();
   
   throwing_div.style.width   = window.innerWidth  + "px";
   throwing_div.style.height  = window.innerHeight + "px";
-  
-  audio_div.style.top        = 20 + "px";
-  audio_div.style.left       = ( window.innerWidth - 120 ) + "px";
 }
 
-function monitor_bowling_ball( )
-{
-  
+function monitor_bowling_ball() {
   if ( bowling_ball[ 1 ].position.y <= -240  ||
        bowling_ball[ 1 ].position.y >= 240   ||
        bowling_ball[ 1 ].position.z < -15    ||
@@ -929,16 +689,11 @@ function monitor_bowling_ball( )
        isNaN( bowling_ball[ 1 ].position.y ) ||
        isNaN( bowling_ball[ 1 ].position.z )  )
   {
-    
-    reset_bowling_ball( );
-    
+    reset_bowling_ball();
   }
-  
 }
 
-function reset_bowling_ball( )
-{
-  
+function reset_bowling_ball() {
   bowling_ball[ 1 ].position.set( bowling_ball_origin[ 0 ], 
           bowling_ball_origin[ 1 ], 
           bowling_ball_origin[ 2 ] );
@@ -954,29 +709,19 @@ function reset_bowling_ball( )
   bowling_ball[ 0 ].force.set( 0, 0, 1200 );
   
   bowling_ball_thrown = false;
-  
   switching_view = true;
-  
-  switch_to_throw_view( );
-  
+  switch_to_throw_view();
 }
 
-function monitor_bowling_pins( )
-{
-  
+function monitor_bowling_pins() {
   if ( resetting_bowling_pins == true || bowling_pins.length == 0 || play == false ) return;  
   
   var resets = 0;
-  
   var angle = 15;
-  
   var distance = 5;
-  
   var i = bowling_pins.length;
   
-  while ( i-- )
-  {
-  
+  while ( i-- ) {
     var bowling_pin = bowling_pins[ i ];
     
     if ( Math.abs( bowling_pin[ 1 ].rotation.x * 180 / Math.PI ) >= angle || 
@@ -985,88 +730,54 @@ function monitor_bowling_pins( )
          Math.abs( bowling_pin[ 1 ].position.y - bowling_pin[ 0 ].initPosition.y ) > distance ||
          Math.abs( bowling_pin[ 1 ].position.z - bowling_pin[ 0 ].initPosition.z ) > distance )
     {
-      
       resets += 1;
       
       bowling_pins_reset = false;
       
-      if ( bowling_pin[ 1 ].visible )
-      {
-      
+      if ( bowling_pin[ 1 ].visible ) {
         hit_bowling_pins.push( i );
-        
       }
-      
     }
-    
   }
   
-  if ( hit_bowling_pins.length > 0 && ( new Date( ) ).valueOf( ) - hit_sound_effect_played > 2000 )
-  {
-    
-    hit_sound_effect.stop( );
-    
-    hit_sound_effect.play( );
-    
-    hit_sound_effect_played = ( new Date( ) ).valueOf( );
-    
+  if ( hit_bowling_pins.length > 0 && ( new Date() ).valueOf() - hit_sound_effect_played > 2000 ) {
+    hit_sound_effect.stop();
+    hit_sound_effect.play();
+    hit_sound_effect_played = ( new Date() ).valueOf();
   }
 
-  if ( hit_bowling_pins.length != 0 )
-  {
-  
-    window.setTimeout( function ( ) {
-      
+  if ( hit_bowling_pins.length != 0 ) {
+    window.setTimeout( function () {
       if ( bowling_pins_reset == true ) return;
     
       var i = hit_bowling_pins.length;
       
-      while ( i-- )
-      {
-
+      while ( i-- ) {
         bowling_pins[ hit_bowling_pins[ i ] ][ 1 ].visible = false;
-      
         bowling_pins[ hit_bowling_pins[ i ] ][ 0 ].collisionFilterGroup = 2;
-    
       }
-      
       hit_bowling_pins = [ ];
-      
     }, 1500 );
-  
   }  
   
-  if ( resets == bowling_pins.length )
-  {
-    
+  if ( resets == bowling_pins.length ) {
     resetting_bowling_pins = true;
     
-    var timer = window.setTimeout( function ( ) {
-      
-      reset_bowling_pins( );
-      
-      reset_bowling_ball( );
-  
+    var timer = window.setTimeout( function () {
+      reset_bowling_pins();
+      reset_bowling_ball();
       current_round_throws = 0;
-      
     }, 10 );
     
     timers.push( timer );
-    
-    clear_old_timers( );
-    
+    clear_old_timers();
   }
-  
 }
 
-function reset_bowling_pins( )
-{
-  
+function reset_bowling_pins() {
   var i = bowling_pins.length;
       
-  while ( i-- )
-  {
-    
+  while ( i-- ) {
     var bowling_pin          = bowling_pins[ i ];
     var bowling_pin_position = bowling_pin_positions[ i ];
   
@@ -1100,128 +811,9 @@ function reset_bowling_pins( )
   resetting_bowling_pins = false;
   
   bowling_pins_reset = true;
-  
 }
 
-function handle_power_div( )
-{
-  
-  if ( mouse_positions.length == 0 || play == false ) return;
-  
-  if ( bowling_ball_thrown == true )
-  {
-    
-    power_div.style.background = "rgba(0,0,0,0)";
-    
-    power_div.style.width = "300px";
-    
-    power_div.innerHTML = "CLICK TO RETURN THE BALL";
-    
-    var x = mouse_positions[ mouse_positions.length - 1 ][ 0 ] + 20;
-    var y = mouse_positions[ mouse_positions.length - 1 ][ 1 ] + 20;
-    
-    power_div.style.top  = y + "px";
-    power_div.style.left = x + "px";
-    
-    //power_div.style.visibility = "hidden";
-    
-  }
-  else
-  {
-    
-    power_div.style.visibility = "visible";
-    
-    power_div.style.background = "#0f0";
-    
-    power_div.style.width = "200px";
-    
-    power_div.innerHTML = "";
-    
-    var x = mouse_positions[ mouse_positions.length - 1 ][ 0 ] + 20;
-    var y = mouse_positions[ mouse_positions.length - 1 ][ 1 ] + 20;
-    
-    power_div.style.top  = y + "px";
-    power_div.style.left = x + "px";
-    
-    if ( mouse_is_down == true && on_mouse_down_mouse_on_ball == true )
-    {
-
-      var power = calculate_power_level( );
-      
-      var percentage = Math.floor( ( power / max_throwing_power ) * 100 );
-      
-      if ( percentage < 70 )
-      {
-        
-        power_div.style.background = "#ff0";
-        
-      }
-      
-      if ( percentage < 30 )
-      {
-        
-        power_div.style.background = "#f00";
-        
-      }
-      
-      if ( percentage < 0 )
-      {
-        
-        percentage = 0;
-        
-      }
-      
-      power_div.style.width = percentage * 2 + "px";
-      
-    }
-    else
-    {
-      
-      if ( mouse_3d_intersection( mouse_positions[ mouse_positions.length - 1 ][ 0 ], 
-                            mouse_positions[ mouse_positions.length - 1 ][ 1 ] ).id ==
-                            bowling_ball[ 1 ].id )
-      {
-      
-      
-        power_div.style.background = "rgba(0,0,0,0)";
-      
-        power_div.style.width = "300px";
-        
-        power_div.innerHTML = "HOLD DOWN THE MOUSE, AIM, AND RELEASE";
-        
-        var x = mouse_positions[ mouse_positions.length - 1 ][ 0 ] + 20;
-        var y = mouse_positions[ mouse_positions.length - 1 ][ 1 ] + 20;
-        
-        power_div.style.top  = y + "px";
-        power_div.style.left = x + "px";
-        
-      }
-      else
-      {
-        
-        power_div.style.background = "rgba(0,0,0,0)";
-      
-        power_div.style.width = "300px";
-        
-        power_div.innerHTML = "MOVE THE MOUSE OVER THE BALL";
-        
-        var x = mouse_positions[ mouse_positions.length - 1 ][ 0 ] + 20;
-        var y = mouse_positions[ mouse_positions.length - 1 ][ 1 ] + 20;
-        
-        power_div.style.top  = y + "px";
-        power_div.style.left = x + "px";
-        
-      }
-        
-    }
-    
-  }
-  
-}
-
-function switch_to_throw_view( )
-{
-  
+function switch_to_throw_view() {
   camera.up.set( 0, 0, 1 );
   camera.position.z = throwing_view.position.z;
   camera.position.y = throwing_view.position.y;
@@ -1230,12 +822,9 @@ function switch_to_throw_view( )
   current_view = "throw";
   
   switching_view = false;
-  
 }
 
-function switch_to_bowling_pin_view( )
-{
-  
+function switch_to_bowling_pin_view() {
   if ( bowling_ball[ 1 ].position.y == bowling_ball_origin[ 1 ] ) return;  
   
   camera.position.z = bowling_pin_view.position.z;
@@ -1246,57 +835,31 @@ function switch_to_bowling_pin_view( )
   current_view = "bowling_pin";
   
   switching_view = false;
-  
 }
 
 window.onload = initialize;
 
 // Utilities.
 
-function random_float_in_range( min, max ) 
-{
-    
-  return Math.random( ) * ( max - min ) + min;
-  
-}
-
-function random_sign( ) 
-{
-    
-  var x = 1;
-  
-  if ( Math.random( ) < 0.5 ) x = -1;
-  
-  return x;
-  
-}
-
-function clear_old_timers( )
-{
-  
+function clear_old_timers() {
   var i = timers.length;  
   
   if ( i == 1 ) return;
   
   i -= 1;  
   
-  while ( i-- )
-  {
-    
+  while ( i-- ) {
     window.clearTimeout( timers[ i ] );
-    
   }
   
   timers = [ timers[ timers.length - 1 ] ];
   
 }
 
-function screen_position_2d_to_3d( x, y, z_plane )
-{
-  
+function screen_position_2d_to_3d( x, y, z_plane ) {
   if ( z_plane == undefined ) z_plane = 0;
   
-  var vector = new THREE.Vector3( );
+  var vector = new THREE.Vector3();
   
   vector.x =  ( x / window.innerWidth  ) * 2 - 1;
   vector.y = -( y / window.innerHeight ) * 2 + 1;
@@ -1304,35 +867,15 @@ function screen_position_2d_to_3d( x, y, z_plane )
   
   projector.unprojectVector( vector, camera );
   
-  var direction   =  vector.sub( camera.position ).normalize( );
+  var direction   =  vector.sub( camera.position ).normalize();
   var distance    = -camera.position.z / direction.z;
-  var position_3d =  camera.position.clone( ).add( direction.multiplyScalar( distance - z_plane ) );
+  var position_3d =  camera.position.clone().add( direction.multiplyScalar( distance - z_plane ) );
   
   return position_3d;
-  
 }
 
-function calculate_power_level( )
-{
-  
-  if ( on_mouse_down_time == null || on_mouse_down_time == undefined ) return max_throwing_power;
-  
-  var t1 = on_mouse_down_time / 1000;
-  var t2 = ( new Date( ) ).valueOf( ) / 1000;
-  var td = t2 - t1;
-  
-  var power = ( -( 1 / 0.000005 ) * td ) + max_throwing_power;
-  
-  if ( power < 0 ) power = 0;
-
-  return power;
-  
-}
-
-function mouse_3d_intersection( x, y )
-{
-
-  var mouse_coordinates = new THREE.Vector3( );
+function mouse_3d_intersection( x, y ) {
+  var mouse_coordinates = new THREE.Vector3();
   
   mouse_coordinates.x =     2 * ( x / window.innerWidth  ) - 1;
   mouse_coordinates.y = 1 - 2 * ( y / window.innerHeight );
@@ -1341,11 +884,7 @@ function mouse_3d_intersection( x, y )
   var ray = projector.pickingRay( mouse_coordinates, camera );
   var objects = ray.intersectObjects( scene.children );
   
-  if( objects.length )
-  {
-    
+  if( objects.length ) {
     return objects[ 0 ].object;
-    
   }
-
 }

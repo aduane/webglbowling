@@ -11,25 +11,6 @@ canvas {
   height: 100%;
 }
 
-.settings_div {
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  z-index: 1;
-  font-size: 80px;
-  color: #000;
-  display: block;
-  opacity: 0.8;
-  text-align: center;
-  visibility: hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
 .loading_div {
   top: 0px;
   left: 0px;
@@ -47,50 +28,6 @@ canvas {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-.start_div {
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  z-index: 3;
-  font-size: 50px;
-  color: #000;
-  display: block;
-  opacity: 0.5;
-  visibility: hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.power_div {
-  top: 0px;
-  left: 0px;
-  position: absolute;
-  z-index: 1;
-  font-size: 15px;
-  color: #000;
-  background-color: #0f0;
-  display: block;
-  width: 200px;
-  height: 10px;
-  opacity: 0.5;
-  visibility: hidden;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  border: solid #111 0px;
-  -moz-border-radius:    2px;
-  -webkit-border-radius: 2px;  
-  border-radius:         2px;
-  -khtml-border-radius:  2px;
 }
 
 .throwing_div {
